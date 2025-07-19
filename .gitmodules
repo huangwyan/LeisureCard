@@ -1,0 +1,6 @@
+[submodule "LeisureCard"]
+	path = LeisureCard
+	url = https://github.com/huangwyan/LeisureCard.git
+[submodule "MVVMArchitecture"]
+	path = MVVMArchitecture
+	url = https://github.com/huangwyan/MVVMArchitecture.git

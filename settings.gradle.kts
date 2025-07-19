@@ -22,4 +22,4 @@ dependencyResolutionManagement {
 rootProject.name = "LeisureCard"
 include(":app")
 include(":common")
-include(":base")
+include(":MVVMArchitecture")
