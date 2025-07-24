@@ -1,5 +1,6 @@
 package com.leisure.card.web
 
+import android.util.Log
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
@@ -53,7 +54,7 @@ fun ComposeWebView(
     val reloadTrigger = remember { mutableStateOf(0) }
 
     Box(modifier = modifier.fillMaxSize()) {
-
+        Log.e("webview","url${url}")
         if (loadError) {
             // 错误页
             Column(
