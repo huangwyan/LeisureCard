@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.LeisureCard" parent="android:Theme.Material.Light.NoActionBar">
+        <!-- 设置启动背景 -->
+        <item name="android:background">@color/yellow</item>
+
+        <!-- 设置 logo 居中 -->
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/logo</item>
+        <item name="android:windowSplashScreenIconBackgroundColor">@color/yellow</item>
+
+        <!-- 控制动画持续时间（可选） -->
+        <item name="android:windowSplashScreenAnimationDuration">500</item>
+
+    </style>
+</resources>
