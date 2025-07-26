@@ -52,7 +52,7 @@ fun TaskListDialog(
                     .padding(20.dp)
                     .fillMaxWidth()
             ) {
-                val allDone = tasks.all { it.status == TaskStatus.SUCCESS }
+                val allDone = tasks.all { it.status != TaskStatus.LOADING }
                 Text(
                     if (allDone) "检测完成" else "设备检测中",
                     style = MaterialTheme.typography.titleMedium
@@ -92,7 +92,7 @@ fun TaskItemView(task: TaskItem) {
             .padding(12.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(task.name, Modifier.weight(1f))
+            Text(task.title, Modifier.weight(1f))
 
             when (task.status) {
                 TaskStatus.LOADING -> CircularProgressIndicator(
@@ -110,7 +110,7 @@ fun TaskItemView(task: TaskItem) {
             Text(
                 text = task.result,
                 fontSize = 12.sp,
-                color = Color.DarkGray
+                color = if (task.status == TaskStatus.FAIL) Color.Red else Color.DarkGray
             )
         }
     }
