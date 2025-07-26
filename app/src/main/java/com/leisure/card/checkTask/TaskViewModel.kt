@@ -13,31 +13,45 @@ import kotlinx.coroutines.launch
  **/
 class TaskViewModel : ViewModel() {
 
-    private val _taskStatusMap = MutableStateFlow<Map<String, TaskStatus>>(emptyMap())
-    val taskStatusMap: StateFlow<Map<String, TaskStatus>> = _taskStatusMap
+    private val _tasks = MutableStateFlow<List<TaskItem>>(emptyList())
+    val tasks: StateFlow<List<TaskItem>> = _tasks
 
-    // 模拟任务名称列表（你可以传参）
-    private val tasks = listOf("任务 A", "任务 B", "任务 C", "任务 D")
+    fun startTasks() {
+        // 配置任务名称 + 动作
+        val taskList = listOf(
+            TaskItem("任务 A", action = { delay(1500) }),
+            TaskItem("任务 B", action = { delay(2000) }),
+            TaskItem("任务 C", action = { delay(1000) }),
+            TaskItem("任务 D", action = { delay(2500) })
+        )
 
-    fun startAllTasks() {
-        // 初始化为 LOADING 状态
-        _taskStatusMap.value = tasks.associateWith { TaskStatus.LOADING }
+        // 初始化状态为 LOADING
+        _tasks.value = taskList.map { it.copy(status = TaskStatus.LOADING) }
 
+        // 启动并发执行任务
         viewModelScope.launch {
-            tasks.forEach { taskName ->
+            taskList.forEachIndexed { index, task ->
                 launch {
-                    runSingleTask(taskName)
+                    runTask(index, task)
                 }
             }
         }
     }
 
-    private suspend fun runSingleTask(taskName: String) {
-        val duration = (1000..3000).random().toLong() // 随机延迟
-        delay(duration)
+    private suspend fun runTask(index: Int, task: TaskItem) {
+        try {
+            task.action() // 执行自定义任务
+            updateTaskStatus(index, TaskStatus.SUCCESS)
+        } catch (e: Exception) {
+            updateTaskStatus(index, TaskStatus.FAIL)
+        }
+    }
 
-        _taskStatusMap.update { currentMap ->
-            currentMap + (taskName to TaskStatus.SUCCESS)
+    private fun updateTaskStatus(index: Int, status: TaskStatus) {
+        _tasks.update { currentList ->
+            currentList.toMutableList().apply {
+                this[index] = this[index].copy(status = status)
+            }
         }
     }
 }

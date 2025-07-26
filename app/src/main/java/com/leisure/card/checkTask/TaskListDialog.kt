@@ -35,13 +35,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 @Composable
 fun TaskListDialog(
     onDismissRequest: () -> Unit,
+    viewModel: TaskViewModel = viewModel()
 ) {
-    val viewModel: TaskViewModel = viewModel()
-    val taskMap by viewModel.taskStatusMap.collectAsState()
+    val tasks by viewModel.tasks.collectAsState()
 
-    // 启动任务（只启动一次）
     LaunchedEffect(Unit) {
-        viewModel.startAllTasks()
+        viewModel.startTasks()
     }
 
     Dialog(onDismissRequest = onDismissRequest) {
@@ -55,7 +54,8 @@ fun TaskListDialog(
                     .fillMaxWidth()
                     .padding(20.dp)
             ) {
-                Text("任务执行中", style = MaterialTheme.typography.titleMedium)
+                val allDone = tasks.all { it.status == TaskStatus.SUCCESS }
+                Text(if (allDone)"检测完成" else "设备检测中", style = MaterialTheme.typography.titleMedium)
                 Spacer(modifier = Modifier.height(12.dp))
 
                 LazyColumn(
@@ -63,20 +63,19 @@ fun TaskListDialog(
                     modifier = Modifier
                         .heightIn(max = 300.dp)
                 ) {
-                    items(taskMap.entries.toList()) { (taskName, status) ->
-                        TaskItem(taskName, status)
+                    items(tasks) { task ->
+                        TaskItemView(task)
                     }
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                val allDone = taskMap.values.all { it == TaskStatus.SUCCESS }
                 Button(
                     onClick = onDismissRequest,
                     enabled = allDone,
                     modifier = Modifier.align(Alignment.End)
                 ) {
-                    Text(if (allDone) "关闭" else "执行中…")
+                    Text(if (allDone) "关闭" else "检测执行中…")
                 }
             }
         }
@@ -84,7 +83,7 @@ fun TaskListDialog(
 }
 
 @Composable
-fun TaskItem(taskName: String, status: TaskStatus) {
+fun TaskItemView(task: TaskItem) {
     Row(
         Modifier
             .fillMaxWidth()
@@ -92,14 +91,11 @@ fun TaskItem(taskName: String, status: TaskStatus) {
             .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(taskName, Modifier.weight(1f))
-        when (status) {
-            TaskStatus.LOADING -> CircularProgressIndicator(
-                modifier = Modifier.size(20.dp),
-                strokeWidth = 2.dp
-            )
-
+        Text(task.name, Modifier.weight(1f))
+        when (task.status) {
+            TaskStatus.LOADING -> CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
             TaskStatus.SUCCESS -> Text("✅ 完成", color = Color(0xFF4CAF50))
+            TaskStatus.FAIL -> Text("❌ 失败", color = Color.Red)
         }
     }
 }
