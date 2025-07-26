@@ -21,15 +21,21 @@
             android:theme="@style/Theme.LeisureCard"></activity>
 
         <activity
-            android:name=".config.ConfigActivity"
+            android:name=".splash.SplashActivity"
             android:exported="true"
-            android:label="配置测试"
             android:theme="@style/Theme.LeisureCard">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+
+        <activity
+            android:name=".config.ConfigActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.LeisureCard"></activity>
     </application>
 
 </manifest>

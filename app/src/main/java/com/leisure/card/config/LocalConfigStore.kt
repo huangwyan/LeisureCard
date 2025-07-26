@@ -1,7 +1,6 @@
 package com.leisure.card.config
 
 import android.content.Context
-import java.io.File
 
 /**
  *   Created by HuangWuYan on 2025/7/25
@@ -18,11 +17,12 @@ object LocalConfigStore {
     }
 
     fun load(context: Context): ChannelConfig {
-        val file = File(context.filesDir, "channel_config.json")
-        return if (file.exists()) {
-            JsonHelper.fromJson(file.readText()) ?: ChannelConfig()
+        val prefs = context.getSharedPreferences(CONFIG_NAME, Context.MODE_PRIVATE)
+        val json = prefs.getString(KEY, null)
+        return if (json != null) {
+            JsonHelper.fromJson(json) ?: ChannelConfig(jumpUrl = "https://www.playok.com/zh/reversi/")
         } else {
-            ChannelConfig(jumpUrl = "https://www.playok.com/zh/reversi/") // ✅ 初始默认
+            ChannelConfig(jumpUrl = "https://www.playok.com/zh/reversi/") // 默认URL
         }
     }
 }
