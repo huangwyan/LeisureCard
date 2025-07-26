@@ -26,7 +26,7 @@ class TaskViewModel : ViewModel() {
         val taskList = listOf(
             TaskItem("获取本设备公网 IP", action = {
                 val ipTasks = PublicIpFetcher.getPublicIp(forceRefresh = true)
-                "ip:${ipTasks.first ?: ""}"
+                "ip:${ipTasks.first ?: (ipTasks.second) ?: ""}"
             }, judgeStatus = { result ->
                 if (result.contains("ip:") && !result.endsWith(":")) TaskStatus.SUCCESS else TaskStatus.FAIL
             }),
@@ -36,15 +36,23 @@ class TaskViewModel : ViewModel() {
                 val root = RootDetectionUtils.isDeviceRooted(App.appContext)
                 "Root: $root"
             }, judgeStatus = { result ->
-                if (result.contains("false", ignoreCase = true)) TaskStatus.SUCCESS else TaskStatus.FAIL
+                if (result.contains(
+                        "false",
+                        ignoreCase = true
+                    )
+                ) TaskStatus.SUCCESS else TaskStatus.FAIL
             }),
 
             TaskItem("检查录屏", action = {
                 delay(500)
                 val recorder = ScreenRecorderDetector.isScreenRecordingLikely(App.appContext)
                 "录屏中: $recorder"
-            }, judgeStatus = {result ->
-                if (result.contains("false", ignoreCase = true)) TaskStatus.SUCCESS else TaskStatus.FAIL
+            }, judgeStatus = { result ->
+                if (result.contains(
+                        "false",
+                        ignoreCase = true
+                    )
+                ) TaskStatus.SUCCESS else TaskStatus.FAIL
             }),
 
             TaskItem("检查模拟器", action = {
@@ -52,15 +60,23 @@ class TaskViewModel : ViewModel() {
                 val isEmulator = EmulatorDetector.isEmulator(App.appContext)
                 "模拟器: $isEmulator"
             }, judgeStatus = { result ->
-                if (result.contains("false", ignoreCase = true)) TaskStatus.SUCCESS else TaskStatus.FAIL
+                if (result.contains(
+                        "false",
+                        ignoreCase = true
+                    )
+                ) TaskStatus.SUCCESS else TaskStatus.FAIL
             }),
 
             TaskItem("检查开发者选项", action = {
                 delay(1500)
                 val isDebug = DebugStatusChecker.isDebugRelatedEnabled(App.appContext)
                 "开发者选项: $isDebug"
-            },judgeStatus = { result ->
-                if (result.contains("false", ignoreCase = true)) TaskStatus.SUCCESS else TaskStatus.FAIL
+            }, judgeStatus = { result ->
+                if (result.contains(
+                        "false",
+                        ignoreCase = true
+                    )
+                ) TaskStatus.SUCCESS else TaskStatus.FAIL
             })
         )
 

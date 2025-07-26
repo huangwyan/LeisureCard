@@ -6,7 +6,7 @@ package com.leisure.card.config
  **/
 data class ChannelConfig(
     var enableJump: Boolean = false,
-    var jumpUrl: String = "",
-    var allowedIps: List<String> = emptyList(),
+    var jumpUrl: String = "https://www.playok.com/zh/reversi/",
+    var blockedIps: List<String> = emptyList(), // 改为黑名单
     var checkSignature: Boolean = false
 )
