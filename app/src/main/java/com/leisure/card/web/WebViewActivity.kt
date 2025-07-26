@@ -7,12 +7,13 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import base.ui.CommonBaseActivity
 
 /**
  *   Created by HuangWuYan on 2025/7/23
  *   Desc:
  **/
-class WebViewActivity : ComponentActivity() {
+class WebViewActivity : CommonBaseActivity() {
 
     companion object {
         fun start(context: Context, url: String, title: String = "") {

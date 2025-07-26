@@ -25,13 +25,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import base.ui.CommonBaseActivity
 import com.leisure.card.checkTask.TaskListDialog
 
 /**
  *   Created by HuangWuYan on 2025/7/25
  *   Desc:
  **/
-class ConfigActivity : ComponentActivity() {
+class ConfigActivity : CommonBaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
