@@ -7,11 +7,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -26,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 
@@ -51,19 +49,21 @@ fun TaskListDialog(
         ) {
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
                     .padding(20.dp)
+                    .fillMaxWidth()
             ) {
                 val allDone = tasks.all { it.status == TaskStatus.SUCCESS }
-                Text(if (allDone)"检测完成" else "设备检测中", style = MaterialTheme.typography.titleMedium)
+                Text(
+                    if (allDone) "检测完成" else "设备检测中",
+                    style = MaterialTheme.typography.titleMedium
+                )
                 Spacer(modifier = Modifier.height(12.dp))
 
-                LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier
-                        .heightIn(max = 300.dp)
+                // 不使用 LazyColumn，改为 Column 一次性展示所有任务
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    items(tasks) { task ->
+                    tasks.forEach { task ->
                         TaskItemView(task)
                     }
                 }
@@ -84,18 +84,34 @@ fun TaskListDialog(
 
 @Composable
 fun TaskItemView(task: TaskItem) {
-    Row(
+    Column(
         Modifier
             .fillMaxWidth()
-            .background(Color(0xFFF8F8F8), RoundedCornerShape(8.dp))
-            .padding(12.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .height(80.dp)
+            .background(Color(0xFFF5F5F5), RoundedCornerShape(8.dp))
+            .padding(12.dp)
     ) {
-        Text(task.name, Modifier.weight(1f))
-        when (task.status) {
-            TaskStatus.LOADING -> CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
-            TaskStatus.SUCCESS -> Text("✅ 完成", color = Color(0xFF4CAF50))
-            TaskStatus.FAIL -> Text("❌ 失败", color = Color.Red)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(task.name, Modifier.weight(1f))
+
+            when (task.status) {
+                TaskStatus.LOADING -> CircularProgressIndicator(
+                    Modifier.size(18.dp),
+                    strokeWidth = 2.dp
+                )
+
+                TaskStatus.SUCCESS -> Text("✅", color = Color(0xFF4CAF50))
+                TaskStatus.FAIL -> Text("❌", color = Color.Red)
+            }
+        }
+
+        if (!task.result.isNullOrBlank()) {
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = task.result,
+                fontSize = 12.sp,
+                color = Color.DarkGray
+            )
         }
     }
 }

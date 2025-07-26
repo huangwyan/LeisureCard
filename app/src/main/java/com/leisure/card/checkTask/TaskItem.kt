@@ -5,10 +5,11 @@ package com.leisure.card.checkTask
  **/
 data class TaskItem(
     val name: String,
-    val action: suspend () -> Unit,
-    val status: TaskStatus = TaskStatus.LOADING
+    val action: suspend () -> String, // 返回执行结果
+    val status: TaskStatus = TaskStatus.LOADING,
+    val result: String? = null        // 新增字段：执行结果
 )
 
 enum class TaskStatus {
-    LOADING, SUCCESS, FAIL // 可扩展失败状态
+    LOADING, SUCCESS, FAIL
 }

@@ -1,6 +1,5 @@
 package com.leisure.card.checkTask
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import base.aminer.DebugStatusChecker
@@ -8,8 +7,6 @@ import base.aminer.EmulatorDetector
 import base.aminer.RootDetectionUtils
 import base.aminer.ScreenRecorderDetector
 import base.ip.PublicIpFetcher
-import com.google.gson.Gson
-import com.imyyq.mvvm.utils.LogUtil
 import com.leisure.card.app.App
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,34 +23,35 @@ class TaskViewModel : ViewModel() {
     val tasks: StateFlow<List<TaskItem>> = _tasks
 
     fun startTasks() {
-        // 配置任务名称 + 动作
         val taskList = listOf(
-            TaskItem("获取本设备公网ip", action = {
+            TaskItem("获取本设备公网 IP", action = {
                 val ipTasks = PublicIpFetcher.getPublicIp(forceRefresh = true)
-                Log.d("task", "ip json ${Gson().toJson(ipTasks)}")
+                "ip:${ipTasks.first ?: ""}" // 作为返回值
             }),
-            TaskItem("检查Root", action = {
+            TaskItem("检查 Root", action = {
+                delay(1000)
                 val root = RootDetectionUtils.isDeviceRooted(App.appContext)
-                Log.d("task", "检查Root $root")
+                "Root: $root"
             }),
             TaskItem("检查录屏", action = {
+                delay(500)
                 val recorder = ScreenRecorderDetector.isScreenRecordingLikely(App.appContext)
-                Log.d("task", "检查录屏 $recorder")
+                "录屏中: $recorder"
             }),
-            TaskItem(
-                "检查是否是模拟器",
-                action = { val isEmulator = EmulatorDetector.isEmulator(App.appContext)
-                    Log.d("task", "检查模拟器 $isEmulator")}),
-            TaskItem(
-                "检查是否开启开发者选项",
-                action = { val isDebug = DebugStatusChecker.isDebugRelatedEnabled(App.appContext)
-                    Log.d("task", "检查开发者 $isDebug")})
+            TaskItem("检查模拟器", action = {
+                delay(1000)
+                val isEmulator = EmulatorDetector.isEmulator(App.appContext)
+                "模拟器: $isEmulator"
+            }),
+            TaskItem("检查开发者选项", action = {
+                delay(1500)
+                val isDebug = DebugStatusChecker.isDebugRelatedEnabled(App.appContext)
+                "开发者选项: $isDebug"
+            })
         )
 
-        // 初始化状态为 LOADING
-        _tasks.value = taskList.map { it.copy(status = TaskStatus.LOADING) }
+        _tasks.value = taskList.map { it.copy(status = TaskStatus.LOADING, result = null) }
 
-        // 启动并发执行任务
         viewModelScope.launch {
             taskList.forEachIndexed { index, task ->
                 launch {
@@ -65,17 +63,17 @@ class TaskViewModel : ViewModel() {
 
     private suspend fun runTask(index: Int, task: TaskItem) {
         try {
-            task.action() // 执行自定义任务
-            updateTaskStatus(index, TaskStatus.SUCCESS)
+            val result = task.action() // 获取结果
+            updateTask(index, TaskStatus.SUCCESS, result)
         } catch (e: Exception) {
-            updateTaskStatus(index, TaskStatus.FAIL)
+            updateTask(index, TaskStatus.FAIL, e.localizedMessage ?: "未知错误")
         }
     }
 
-    private fun updateTaskStatus(index: Int, status: TaskStatus) {
+    private fun updateTask(index: Int, status: TaskStatus, result: String?) {
         _tasks.update { currentList ->
             currentList.toMutableList().apply {
-                this[index] = this[index].copy(status = status)
+                this[index] = this[index].copy(status = status, result = result)
             }
         }
     }
