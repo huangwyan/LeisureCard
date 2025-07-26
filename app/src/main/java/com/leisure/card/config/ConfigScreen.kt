@@ -190,24 +190,55 @@ fun ConfigTestScreen() {
 
 
         val jumpResult = remember { mutableStateOf<String?>(null) }
+        var isJumping by remember { mutableStateOf(false) }
+
         Button(
             onClick = {
-                if (!config.enableJump) {
-                    jumpResult.value = "❌ 跳转开关未开启"
-                } else if (config.jumpUrl.isBlank()) {
-                    jumpResult.value = "❌ 跳转 URL 为空"
-                } else {
-                    try {
-                        WebViewActivity.start(context = context, url = config.jumpUrl)
-                        jumpResult.value = "✅ 已跳转至配置地址"
-                    } catch (e: Exception) {
-                        jumpResult.value = "❌ 跳转失败：${e.message}"
+                isJumping = true
+                jumpResult.value = null
+
+                CoroutineScope(Dispatchers.IO).launch {
+                    val ipConfig = PublicIpFetcher.getPublicIp(true)
+                    val ip = ipConfig.first ?: ipConfig.second ?: ""
+                    val blocked =
+                        if (ip.isEmpty()) false else IpBlockChecker.isBlocked(ip, config.blockedIps)
+
+                    withContext(Dispatchers.Main) {
+                        isJumping = false
+                        if (!config.enableJump) {
+                            jumpResult.value = "❌ 跳转开关未开启"
+                        } else if (config.jumpUrl.isBlank()) {
+                            jumpResult.value = "❌ 跳转 URL 为空"
+                        } else if (ip.isEmpty()) {
+                            jumpResult.value = "❌ 获取公网 IP 失败，无法判断是否黑名单"
+                        } else if (blocked) {
+                            jumpResult.value = "⚠️ 当前 IP $ip 在黑名单中，禁止跳转"
+                        } else {
+                            try {
+                                WebViewActivity.start(context = context, url = config.jumpUrl)
+                                jumpResult.value = "✅ 当前 IP $ip，已跳转至配置地址"
+                            } catch (e: Exception) {
+                                jumpResult.value = "❌ 跳转失败：${e.message}"
+                            }
+                        }
                     }
                 }
             },
-            enabled = config.enableJump && config.jumpUrl.isNotBlank()
+            enabled = !isJumping
         ) {
-            Text("跳转测试")
+            if (isJumping) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    CircularProgressIndicator(
+                        color = Color.White,
+                        modifier = Modifier.size(18.dp),
+                        strokeWidth = 2.dp
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text("跳转中…", fontSize = 12.sp)
+                }
+            } else {
+                Text("跳转测试（需不在黑名单）")
+            }
         }
 
         jumpResult.value?.let {
